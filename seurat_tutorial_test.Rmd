@@ -1,0 +1,69 @@
+---
+title: "analysing_single_cell_data"
+author: "Bhavika Kumar"
+date: "2024-04-19"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Tutorial for Seurat
+
+Using the same data as in tutorial and following the steps
+
+loading libraries
+```{r warning=FALSE, message=FALSE}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(DESeq2)
+  library(ensembldb)
+  library(AnnotationHub)
+  library(GenomicFeatures)
+  library(scRNAseq)
+  library(ExperimentHub)
+  library(SingleCellExperiment)
+  library(SummarizedExperiment)
+  library(scater)
+  library(scran)
+  library(SingleR)
+  library(SingleCellSignalR)
+  library(Seurat)
+})
+```
+
+Loading the sample dataset from the tutorial
+```{r warning=FALSE, message=FALSE}
+sample_data <- Read10X(data.dir = "d:/Users/Sujata Kumar/Desktop/Bh Project/filtered_gene_bc_matrices/hg19/")
+```
+
+Creating a Seurat object with raw non-normalised data. Keeping all genes expressed in >= 3 cells and keeping all cells with at least 200 detected genes. 
+```{r warning=FALSE, message=FALSE}
+sample_df <- CreateSeuratObject(counts = sample_data, project = "testing", min.cells = 3, min.features = 200, assay = "RNA")
+```
+
+QC Analysis and selecting cells for analysis
+```{r warning=FALSE, message=FALSE}
+mito.genes <- grep(pattern = "^MT-", x = rownames(sample_df@assays[["RNA"]]), value = TRUE)
+```
+
+Getting the The % of UMI mapping to MT-genes which is a common scRNA-seq QC metric.
+```{r warning=FALSE, message=FALSE}
+percent.mito <- Matrix::colSums(sample_df@assays[["RNA"]][mito.genes, ])/Matrix::colSums(sample_df@assays[["RNA"]])
+
+# adding the column to the data
+sample_df <- AddMetaData(object = sample_df, metadata = percent.mito, col.name = "percent.mito") 
+```
+
+Visualising the QC statistics as a violin plot
+```{r warning=FALSE, message=FALSE}
+VlnPlot(object = sample_df, features = c("nFeature_RNA", "nCount_RNA", "percent.mito"), ncol = 3)
+```
+
+GenePlot is used to visualise the gene-gene relationships
+```{r warning=FALSE, message=FALSE}
+par(mfrow = c(1, 2))
+FeatureScatter(object = sample_df, feature1 = "nCount_RNA", feature2 = "percent.mito")
+
+FeatureScatter(object = sample_df, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+```
+

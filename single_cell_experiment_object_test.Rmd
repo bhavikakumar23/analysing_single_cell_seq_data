@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+author: "Bhavika Kumar"
+date: "2024-05-01"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Understanding and analysing a single cell public dataset
+
+The data is the human Brain cancer single cell RNA seq dataset from La Manno et al. (2016).
+
+Loading libraries
+```{r warning=FALSE, message=FALSE}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(DESeq2)
+  library(ensembldb)
+  library(AnnotationHub)
+  library(GenomicFeatures)
+  library(scRNAseq)
+  library(ExperimentHub)
+  library(SingleCellExperiment)
+  library(SummarizedExperiment)
+  library(scater)
+  library(scran)
+  library(SingleR)
+  library(SingleCellSignalR)
+  library(Seurat)
+})
+```
+
+Loading the data
+```{r warning=FALSE, message=FALSE}
+cancer_data <- LaMannoBrainData(which = c("human-es", "human-embryo", "human-ips", "mouse-adult", "mouse-embryo"),
+                                ensembl = F,
+                                location = T,
+                                legacy = F)
+
+# which- specifies a string specifying which dataset should be obtained
+# ensembl- whether the output should have ensembl identifiers
+# location- whether genomic coordinates should be retured
+# legacy- whether to pull data from ExperimentHub 
+```
+
+The output is a SingleCellExperiment object.
+
+Getting just the human-embryo dataset
+```{r warning=FALSE, message=FALSE}
+sce.h.em <- LaMannoBrainData("human-embryo")
+```
+
+converting the SingleCellExperiemnt object to data frame
+```{r warning=FALSE, message=FALSE}
+cancer_df <- as_tibble(cancer_data)
+human_embryo <- as_tibble(sce.h.em)
+```
+
+Getting the count matrix
+```{r warning=FALSE, message=FALSE}
+mat2 <- counts(sce.h.em)
+```
+
+Getting QC statistics
+```{r warning=FALSE, message=FALSE}
+qcstats <- perCellQCMetrics(sce.h.em)
+```
+
