@@ -1,5 +1,5 @@
 ---
-title: "analysing_single_cell_data"
+title: "seurat_tutorial_test"
 author: "Bhavika Kumar"
 date: "2024-04-19"
 output: html_document
